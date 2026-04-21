@@ -66,4 +66,4 @@ coverage.xml
 
 # Migrations (optional - remove if you want to track migrations)
 # */migrations/*.py
-# !*/migrations/__init__.py
+# !*/migrations/__init__.py.
