@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotacao de Seguro</title>
+    <style>
+        :root {
+            --bg-top: #0e1b2a;
+            --bg-bottom: #163b57;
+            --card: rgba(255, 255, 255, 0.94);
+            --text: #132033;
+            --muted: #5f7187;
+            --line: #d7e0e8;
+            --primary: #f97316;
+            --primary-dark: #d65e0b;
+            --success-bg: #dcfce7;
+            --success-text: #166534;
+            --font: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--font);
+            background:
+                radial-gradient(circle at top left, rgba(249, 115, 22, 0.2), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.18), transparent 30%),
+                linear-gradient(145deg, var(--bg-top), var(--bg-bottom));
+            color: white;
+        }
+
+        .page {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 28px;
+            align-items: center;
+            padding: 32px 0;
+        }
+
+        .hero {
+            padding: 32px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+        }
+
+        h1 {
+            margin: 18px 0 16px;
+            font-size: clamp(2.2rem, 5vw, 4.5rem);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p {
+            max-width: 52ch;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .stat {
+            padding: 18px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+
+        .stat span {
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: var(--card);
+            color: var(--text);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 1.6rem;
+        }
+
+        .card .intro {
+            margin: 0 0 22px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 16px;
+            font: inherit;
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.95);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .errorlist {
+            list-style: none;
+            margin: 8px 0 0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 0.88rem;
+        }
+
+        .messages {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .message {
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: var(--success-bg);
+            color: var(--success-text);
+            font-weight: 600;
+        }
+
+        .submit {
+            border: 0;
+            border-radius: 16px;
+            padding: 15px 18px;
+            background: linear-gradient(135deg, var(--primary), #fb923c);
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 14px 30px rgba(249, 115, 22, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(249, 115, 22, 0.34);
+        }
+
+        .footnote {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .vendor-link {
+            margin-top: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .vendor-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 960px) {
+            .page {
+                grid-template-columns: 1fr;
+                padding: 20px 0 32px;
+            }
+
+            .hero {
+                padding: 8px 8px 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .grid,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 22px;
+                border-radius: 22px;
+            }
+
+            h1 {
+                font-size: 2.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <div class="eyebrow">Seguro sob medida para cada perfil</div>
+            <h1>Solicite sua cotacao em poucos minutos</h1>
+            <p>
+                Preencha o formulario e receba atendimento comercial para seguro auto, residencial, vida, saude ou viagem.
+                A proposta deste projeto e simular um fluxo moderno de captacao de leads para demonstracao em curso.
+            </p>
+            <div class="stats">
+                <div class="stat">
+                    <strong>5 tipos</strong>
+                    <span>de seguro disponiveis</span>
+                </div>
+                <div class="stat">
+                    <strong>Rapido</strong>
+                    <span>cadastro em menos de 1 minuto</span>
+                </div>
+                <div class="stat">
+                    <strong>Humano</strong>
+                    <span>contato posterior com vendedor</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Cadastro para cotacao</h2>
+            <p class="intro">Informe seus dados para que a equipe comercial entre em contato com a melhor proposta.</p>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="grid">
+                    <div>
+                        <label for="{{ form.nome.id_for_label }}">Nome completo</label>
+                        {{ form.nome }}
+                        {{ form.nome.errors }}
+                    </div>
+                    <div>
+                        <label for="{{ form.email.id_for_label }}">E-mail</label>
+                        {{ form.email }}
+                        {{ form.email.errors }}
+                    </div>
+                </div>
+                <div class="grid">
+                    <div>
+                        <label for="{{ form.telefone.id_for_label }}">Telefone</label>
+                        {{ form.telefone }}
+                        {{ form.telefone.errors }}
+                    </div>
+                    <div>
+                        <label for="{{ form.cidade.id_for_label }}">Cidade</label>
+                        {{ form.cidade }}
+                        {{ form.cidade.errors }}
+                    </div>
+                </div>
+                <div>
+                    <label for="{{ form.tipo_seguro.id_for_label }}">Tipo de seguro</label>
+                    {{ form.tipo_seguro }}
+                    {{ form.tipo_seguro.errors }}
+                </div>
+                <div>
+                    <label for="{{ form.mensagem.id_for_label }}">Detalhes do que voce procura</label>
+                    {{ form.mensagem }}
+                    {{ form.mensagem.errors }}
+                </div>
+                <button class="submit" type="submit">Enviar cadastro</button>
+            </form>
+            <p class="footnote">Depois do envio, o lead fica salvo para o time comercial consultar.</p>
+            <a class="vendor-link" href="{% url 'login_vendedor' %}">Entrar como vendedor</a>
+        </section>
+    </main>
+</body>
+</html>

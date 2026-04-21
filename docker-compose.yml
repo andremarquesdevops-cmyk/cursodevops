@@ -1,0 +1,16 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: andremarquesdevops/cursodevops:1.0.0
+    container_name: cursodevops-web
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+      python manage.py collectstatic --noinput &&
+      gunicorn -c gunicorn.conf.py main.wsgi:application"
+    restart: unless-stopped
