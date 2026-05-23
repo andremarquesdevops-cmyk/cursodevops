@@ -138,19 +138,18 @@ jobs:
       - name: Verify deployment
         working-directory: ${{ github.workspace }}
         run: |
-          if docker ps | grep -q "cursodevops$"; then
-            echo "✅ Container cursodevops is running"
+          if docker-compose ps --services --filter "status=running" | grep -q "^web$"; then
+            echo "✅ Serviço web está em execução"
           else
-            echo "❌ Container cursodevops is not running"
+            echo "❌ Serviço web não está em execução"
+            echo "--- docker-compose ps ---"
+            docker-compose ps
+            echo "--- últimos logs do serviço web ---"
+            docker-compose logs --tail=80 web || true
             exit 1
           fi
-          if docker ps | grep -q "cursodevops-celery-cadastro"; then
-            echo "✅ Container cursodevops-celery-cadastro is running"
-          else
-            echo "❌ Container cursodevops-celery-cadastro is not running"
-            exit 1
-          fi
-          docker ps | grep cursodevops
+
+          docker-compose ps
 
       - name: Clean up old Docker images
         run: |
@@ -170,7 +169,7 @@ jobs:
         run: |
           echo "🚀 Deployment completed successfully!"
           echo "Image: andremarquesdevops/cursodevops:${{ github.run_number }}"
-          echo "Container: cursodevops"
+          echo "Container: cursodevops-web"
           echo "docker-compose.yml: ✅ Atualizado do repositório"
           echo ". env: ✅ Atualizado com APP_ENV_FILE do environment PROD"
           echo "Status: Running"  
