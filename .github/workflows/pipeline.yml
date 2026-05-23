@@ -57,6 +57,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # NOVO STEP: Cria um .env temporário no workspace para a validação do compose
+      - name: Prepare workspace .env for validation
+        env:
+          ENV_CONTENT: ${{ secrets.APP_ENV_FILE }}
+        run: |
+          echo "$ENV_CONTENT" > "${{ github.workspace }}/.env"
+          chmod 600 "${{ github.workspace }}/.env"
+
+      # NOVO STEP: Define a versão da imagem para a validação do compose
+      - name: Set VERSION_TAG for validation
+        run: |
+          echo "VERSION_TAG=${{ github.run_number }}" >> "$GITHUB_ENV"
+
       # NOVO STEP: Valida a sintaxe do docker-compose.yml ANTES de copiar (segurança)
       - name: Validate docker-compose.yml from repository
         run: |
