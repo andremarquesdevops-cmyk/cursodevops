@@ -64,7 +64,7 @@ jobs:
             echo "❌ Arquivo docker-compose.yml não encontrado no repositório!"
             exit 1
           fi
-          docker compose -f ${{ github.workspace }}/docker-compose.yml config -q
+          docker-compose ${{ github.workspace }}/docker-compose.yml config -q
           echo "✅ docker-compose.yml validado com sucesso"
 
       # NOVO STEP: Cria backup de segurança do docker-compose.yml atual antes de substituir
@@ -121,7 +121,7 @@ jobs:
         env:
           VERSION_TAG: ${{ github.run_number }}
         run: |
-          docker compose up -d
+          docker-compose up -d
 
       - name: Wait for container to be healthy
         run: |
