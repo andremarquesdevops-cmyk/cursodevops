@@ -46,122 +46,122 @@ jobs:
           docker push "$IMAGE_VERSION_TAG"
           docker push "$IMAGE_LATEST_TAG"
 
-  # deploy:
-  #   needs: build-and-push
-  #   runs-on: self-hosted
-  #   environment: production
-  #   name: Deploy para EC2
+  deploy:
+    needs: build-and-push
+    runs-on: self-hosted
+    environment: production
+    name: Deploy para EC2
 
-  #   steps:
-  #     # NOVO STEP: Faz checkout do código do repositório para ter acesso aos arquivos atualizados
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+    steps:
+      # NOVO STEP: Faz checkout do código do repositório para ter acesso aos arquivos atualizados
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     # NOVO STEP: Valida a sintaxe do docker-compose.prod.yaml ANTES de copiar (segurança)
-  #     - name: Validate docker-compose.prod.yaml from repository
-  #       run: |
-  #         if [ !  -f "${{ github.workspace }}/docker-compose.prod.yaml" ]; then
-  #           echo "❌ Arquivo docker-compose.prod.yaml não encontrado no repositório!"
-  #           exit 1
-  #         fi
-  #         docker compose -f ${{ github.workspace }}/docker-compose.prod.yaml config -q
-  #         echo "✅ docker-compose.prod.yaml validado com sucesso"
+      # NOVO STEP: Valida a sintaxe do docker-compose.yaml ANTES de copiar (segurança)
+      - name: Validate docker-compose.yaml from repository
+        run: |
+          if [ !  -f "${{ github.workspace }}/docker-compose.yaml" ]; then
+            echo "❌ Arquivo docker-compose.yaml não encontrado no repositório!"
+            exit 1
+          fi
+          docker compose -f ${{ github.workspace }}/docker-compose.yaml config -q
+          echo "✅ docker-compose.yaml validado com sucesso"
 
-  #     # NOVO STEP: Cria backup de segurança do docker-compose.prod.yaml atual antes de substituir
-  #     - name: Backup current docker-compose.prod.yaml
-  #       working-directory: /home/ubuntu/message-monitor
-  #       run: |
-  #         if [ -f docker-compose.prod.yaml ]; then
-  #           cp docker-compose.yaml docker-compose.prod.yaml.backup.$(date +%Y%m%d_%H%M%S)
-  #           echo "✅ Backup criado com timestamp"
-  #         else
-  #           echo "⚠️ Nenhum docker-compose.prod.yaml encontrado para backup"
-  #         fi
+      # NOVO STEP: Cria backup de segurança do docker-compose.yaml atual antes de substituir
+      - name: Backup current docker-compose.yaml
+        working-directory: /home/ubuntu/cursodevops
+        run: |
+          if [ -f docker-compose.yaml ]; then
+            cp docker-compose.yaml docker-compose.yaml.backup.$(date +%Y%m%d_%H%M%S)
+            echo "✅ Backup criado com timestamp"
+          else
+            echo "⚠️ Nenhum docker-compose.yaml encontrado para backup"
+          fi
 
-  #     # NOVO STEP: Substitui o docker-compose.prod.yaml do servidor com a versão do repositório
-  #     - name: Update docker-compose.prod.yaml from repository
-  #       run: |
-  #         cp ${{ github.workspace }}/docker-compose.prod.yaml /home/ubuntu/message-monitor/docker-compose.yaml
-  #         echo "✅ docker-compose.yaml atualizado do repositório"
+      # NOVO STEP: Substitui o docker-compose.yaml do servidor com a versão do repositório
+      - name: Update docker-compose.yaml from repository
+        run: |
+          cp ${{ github.workspace }}/docker-compose.yaml /home/ubuntu/cursodevops/docker-compose.yaml
+          echo "✅ docker-compose.yaml atualizado do repositório"
 
-  #     # NOVO STEP: Cria backup do .env atual antes de substituir
-  #     - name: Backup current .env file
-  #       working-directory: /home/ubuntu/message-monitor
-  #       run: |
-  #         if [ -f .env ]; then
-  #           cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
-  #           echo "✅ Backup do .env criado com timestamp"
-  #         else
-  #           echo "⚠️ Nenhum .env encontrado para backup"
-  #         fi
+      # NOVO STEP: Cria backup do .env atual antes de substituir
+      - name: Backup current .env file
+        working-directory: /home/ubuntu/cursodevops
+        run: |
+          if [ -f .env ]; then
+            cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
+            echo "✅ Backup do .env criado com timestamp"
+          else
+            echo "⚠️ Nenhum .env encontrado para backup"
+          fi
 
-  #     # NOVO STEP: Atualiza o arquivo .env com as variáveis SECRET do environment production.
-  #     - name: Update .env file from GitHub environment secrets
-  #       working-directory: /home/ubuntu/message-monitor
-  #       env:
-  #         ENV_CONTENT: ${{ secrets.APP_ENV_FILE }}
-  #       run: |
-  #         echo "$ENV_CONTENT" > .env
-  #         chmod 600 .env
-  #         echo "✅ .env atualizado com APP_ENV_FILE do environment PROD"
-  #         echo "✅ Permissões ajustadas (600)"
-  #         echo "✅ Total de linhas no .env: $(wc -l < .env)"
+      # NOVO STEP: Atualiza o arquivo .env com as variáveis SECRET do environment production.
+      - name: Update .env file from GitHub environment secrets
+        working-directory: /home/ubuntu/cursodevops
+        env:
+          ENV_CONTENT: ${{ secrets.APP_ENV_FILE }}
+        run: |
+          echo "$ENV_CONTENT" > .env
+          chmod 600 .env
+          echo "✅ .env atualizado com APP_ENV_FILE do environment PROD"
+          echo "✅ Permissões ajustadas (600)"
+          echo "✅ Total de linhas no .env: $(wc -l < .env)"
 
-  #     - name: Pull latest image from Docker Hub
-  #       run: |
-  #         docker pull andremarquesdevops/cursodevops:latest
+      - name: Pull latest image from Docker Hub
+        run: |
+          docker pull andremarquesdevops/cursodevops:latest
 
-  #     - name: Stop and remove old container
-  #       working-directory: /home/ubuntu/message-monitor
-  #       run: |
-  #         docker-compose down || true
+      - name: Stop and remove old container
+        working-directory: /home/ubuntu/cursodevops
+        run: |
+          docker-compose down || true
 
-  #     - name: Start new container
-  #       working-directory: /home/ubuntu/message-monitor
-  #       run: |
-  #         docker compose up -d
+      - name: Start new container
+        working-directory: /home/ubuntu/cursodevops
+        run: |
+          docker compose up -d
 
-  #     - name: Wait for container to be healthy
-  #       run: |
-  #         echo "Waiting for container to start..."
-  #         sleep 20
-  #       # verificacao do deploy
-  #     - name: Verify deployment
-  #       working-directory: /home/ubuntu/message-monitor
-  #       run: |
-  #         if docker ps | grep -q "message-monitor$"; then
-  #           echo "✅ Container message-monitor is running"
-  #         else
-  #           echo "❌ Container message-monitor is not running"
-  #           exit 1
-  #         fi
-  #         if docker ps | grep -q "message-monitor-celery-cadastro"; then
-  #           echo "✅ Container message-monitor-celery-cadastro is running"
-  #         else
-  #           echo "❌ Container message-monitor-celery-cadastro is not running"
-  #           exit 1
-  #         fi
-  #         docker ps | grep message-monitor
+      - name: Wait for container to be healthy
+        run: |
+          echo "Waiting for container to start..."
+          sleep 20
+        # verificacao do deploy
+      - name: Verify deployment
+        working-directory: /home/ubuntu/cursodevops
+        run: |
+          if docker ps | grep -q "cursodevops$"; then
+            echo "✅ Container cursodevops is running"
+          else
+            echo "❌ Container cursodevops is not running"
+            exit 1
+          fi
+          if docker ps | grep -q "cursodevops-celery-cadastro"; then
+            echo "✅ Container cursodevops-celery-cadastro is running"
+          else
+            echo "❌ Container cursodevops-celery-cadastro is not running"
+            exit 1
+          fi
+          docker ps | grep cursodevops
 
-  #     - name: Clean up old Docker images
-  #       run: |
-  #         docker image prune -f
-  #         echo "✅ Cleaned up unused Docker images"
+      - name: Clean up old Docker images
+        run: |
+          docker image prune -f
+          echo "✅ Cleaned up unused Docker images"
 
-  #     # NOVO STEP: Remove backups antigos mantendo apenas os 5 mais recentes
-  #     - name: Clean up old backups
-  #       working-directory: /home/ubuntu/message-monitor
-  #       run: |
-  #         ls -t docker-compose.yaml.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
-  #         ls -t . env.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
-  #         echo "✅ Backups antigos removidos (mantidos últimos 5)"
+      # NOVO STEP: Remove backups antigos mantendo apenas os 5 mais recentes
+      - name: Clean up old backups
+        working-directory: /home/ubuntu/cursodevops
+        run: |
+          ls -t docker-compose.yaml.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
+          ls -t . env.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
+          echo "✅ Backups antigos removidos (mantidos últimos 5)"
 
-  #     - name: Deployment summary
-  #       if: success()
-  #       run: |
-  #         echo "🚀 Deployment completed successfully!"
-  #         echo "Image: andremarquesdevops/cursodevops:latest"
-  #         echo "Container: message-monitor"
-  #         echo "docker-compose.prod.yaml: ✅ Atualizado do repositório"
-  #         echo ". env: ✅ Atualizado com APP_ENV_FILE do environment PROD"
-  #         echo "Status: Running"  
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "🚀 Deployment completed successfully!"
+          echo "Image: andremarquesdevops/cursodevops:latest"
+          echo "Container: cursodevops"
+          echo "docker-compose.yaml: ✅ Atualizado do repositório"
+          echo ". env: ✅ Atualizado com APP_ENV_FILE do environment PROD"
+          echo "Status: Running"  
