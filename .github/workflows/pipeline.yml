@@ -161,7 +161,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           ls -t docker-compose.yml.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
-          ls -t . env.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
+          ls -t .env.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
           echo "✅ Backups antigos removidos (mantidos últimos 5)"
 
       - name: Deployment summary
