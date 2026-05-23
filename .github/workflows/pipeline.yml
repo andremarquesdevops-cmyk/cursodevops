@@ -57,32 +57,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # NOVO STEP: Valida a sintaxe do docker-compose.yaml ANTES de copiar (segurança)
-      - name: Validate docker-compose.yaml from repository
+      # NOVO STEP: Valida a sintaxe do docker-compose.yml ANTES de copiar (segurança)
+      - name: Validate docker-compose.yml from repository
         run: |
-          if [ !  -f "${{ github.workspace }}/docker-compose.yaml" ]; then
-            echo "❌ Arquivo docker-compose.yaml não encontrado no repositório!"
+          if [ !  -f "${{ github.workspace }}/docker-compose.yml" ]; then
+            echo "❌ Arquivo docker-compose.yml não encontrado no repositório!"
             exit 1
           fi
-          docker compose -f ${{ github.workspace }}/docker-compose.yaml config -q
-          echo "✅ docker-compose.yaml validado com sucesso"
+          docker compose -f ${{ github.workspace }}/docker-compose.yml config -q
+          echo "✅ docker-compose.yml validado com sucesso"
 
-      # NOVO STEP: Cria backup de segurança do docker-compose.yaml atual antes de substituir
-      - name: Backup current docker-compose.yaml
+      # NOVO STEP: Cria backup de segurança do docker-compose.yml atual antes de substituir
+      - name: Backup current docker-compose.yml
         working-directory: /home/ubuntu/cursodevops
         run: |
-          if [ -f docker-compose.yaml ]; then
-            cp docker-compose.yaml docker-compose.yaml.backup.$(date +%Y%m%d_%H%M%S)
+          if [ -f docker-compose.yml ]; then
+            cp docker-compose.yml docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)
             echo "✅ Backup criado com timestamp"
           else
-            echo "⚠️ Nenhum docker-compose.yaml encontrado para backup"
+            echo "⚠️ Nenhum docker-compose.yml encontrado para backup"
           fi
 
-      # NOVO STEP: Substitui o docker-compose.yaml do servidor com a versão do repositório
-      - name: Update docker-compose.yaml from repository
+      # NOVO STEP: Substitui o docker-compose.yml do servidor com a versão do repositório
+      - name: Update docker-compose.yml from repository
         run: |
-          cp ${{ github.workspace }}/docker-compose.yaml /home/ubuntu/cursodevops/docker-compose.yaml
-          echo "✅ docker-compose.yaml atualizado do repositório"
+          cp ${{ github.workspace }}/docker-compose.yml /home/ubuntu/cursodevops/docker-compose.yml
+          echo "✅ docker-compose.yml atualizado do repositório"
 
       # NOVO STEP: Cria backup do .env atual antes de substituir
       - name: Backup current .env file
@@ -109,7 +109,7 @@ jobs:
 
       - name: Pull latest image from Docker Hub
         run: |
-          docker pull andremarquesdevops/cursodevops:latest
+          docker pull andremarquesdevops/cursodevops:${{ github.run_number }}
 
       - name: Stop and remove old container
         working-directory: /home/ubuntu/cursodevops
@@ -118,6 +118,8 @@ jobs:
 
       - name: Start new container
         working-directory: /home/ubuntu/cursodevops
+        env:
+          VERSION_TAG: ${{ github.run_number }}
         run: |
           docker compose up -d
 
@@ -152,7 +154,7 @@ jobs:
       - name: Clean up old backups
         working-directory: /home/ubuntu/cursodevops
         run: |
-          ls -t docker-compose.yaml.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
+          ls -t docker-compose.yml.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
           ls -t . env.backup.* 2>/dev/null | tail -n +6 | xargs -r rm
           echo "✅ Backups antigos removidos (mantidos últimos 5)"
 
@@ -160,8 +162,8 @@ jobs:
         if: success()
         run: |
           echo "🚀 Deployment completed successfully!"
-          echo "Image: andremarquesdevops/cursodevops:latest"
+          echo "Image: andremarquesdevops/cursodevops:${{ github.run_number }}"
           echo "Container: cursodevops"
-          echo "docker-compose.yaml: ✅ Atualizado do repositório"
+          echo "docker-compose.yml: ✅ Atualizado do repositório"
           echo ". env: ✅ Atualizado com APP_ENV_FILE do environment PROD"
           echo "Status: Running"  
