@@ -1,4 +1,4 @@
-name: CI Sistema Message Monitor - Build e Push to production
+name: CI Sistema Cotação - Build e Push to production
 
 on:
   push:
